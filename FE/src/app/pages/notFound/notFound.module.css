@@ -1,0 +1,84 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%);
+  text-align: center;
+  padding: 2rem;
+}
+
+.animated404 {
+  font-size: 8rem;
+  font-weight: bold;
+  color: #3b82f6;
+  letter-spacing: 0.1em;
+  animation: bounce404 1.5s infinite alternate
+    cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  margin-bottom: 1rem;
+}
+
+@keyframes bounce404 {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-0.5em) scale(1.05);
+  }
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.message {
+  font-size: 1.25rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+}
+
+.homeButton {
+  font-size: 1.125rem;
+  padding: 0.75em 2em;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 2em;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.homeButton:hover,
+.homeButton:focus {
+  background: #2563eb;
+  transform: translateY(-0.1em) scale(1.03);
+}
+
+@media (max-width: 600px) {
+  .animated404 {
+    font-size: 4rem;
+  }
+  .title {
+    font-size: 1.5rem;
+  }
+  .message {
+    font-size: 1rem;
+  }
+  .container {
+    padding: 1rem;
+  }
+}
+
+.fireworks {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 0;
+}
