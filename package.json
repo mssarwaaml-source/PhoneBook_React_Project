@@ -1,5 +1,5 @@
 {
-  "name": "phonebook-app",
+  "name": "phonebook-fullstack",
   "version": "1.0.0",
   "description": "Phone Book Application with React Frontend and Node.js Backend",
   "main": "BE/server.js",
@@ -7,12 +7,12 @@
     "start": "cd BE && npm start",
     "install": "cd BE && npm install",
     "dev": "cd BE && npm run dev",
-    "build": "cd BE && npm install"
+    "build": "cd BE && npm run build"
   },
-  "keywords": ["phonebook", "react", "nodejs", "express"],
-  "author": "mssarwaaml-source",
-  "license": "ISC",
+  "keywords": ["phonebook", "react", "nodejs", "mysql"],
+  "author": "Your Name",
+  "license": "MIT",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   }
 }
