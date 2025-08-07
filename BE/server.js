@@ -1,18 +1,20 @@
 const express = require("express");
 const cors = require("cors");
-const app = express();
 const session = require("express-session");
-const login_logout = require("./Router/login_logout");
-const contacts = require("./Router/contacts");
-const groups = require("./Router/groups");
+const path = require("path");
 
-const port = process.env.PORT || 5000;
+// Import routes
+const loginLogoutRoutes = require("./Router/login_logout");
+const contactsRoutes = require("./Router/contacts");
+const groupsRoutes = require("./Router/groups");
 
-// CORS configuration for production
+const app = express();
+
+// CORS configuration for production deployment
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://your-netlify-app.netlify.app", // Replace with your actual Netlify URL
-  "https://your-custom-domain.com", // Replace with your custom domain if any
+  "https://your-netlify-app.netlify.app", // Update with your Netlify URL
+  "https://your-custom-domain.com", // Update with your custom domain if any
 ];
 
 app.use(
@@ -31,29 +33,45 @@ app.use(
   })
 );
 
-app.use(express.json());
+// Session configuration
 app.use(
   session({
     secret: process.env.SESSION_SECRET || "secret",
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   })
 );
-app.use("/images", express.static("images"));
 
-app.use("/app/Contacts", contacts);
-app.use("/app/Groups", groups);
-app.use("/", login_logout);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
+// Serve static files from images directory
+app.use("/images", express.static(path.join(__dirname, "images")));
+
+// Health check endpoint for deployment monitoring
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK", message: "Server is running" });
+  res.json({
+    status: "OK",
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "development",
+  });
 });
+
+// Routes
+app.use("/api", loginLogoutRoutes);
+app.use("/api/contacts", contactsRoutes);
+app.use("/api/groups", groupsRoutes);
+
+const port = process.env.PORT || 5000;
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`Health check: http://localhost:${port}/health`);
 });
