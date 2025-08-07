@@ -7,13 +7,30 @@ const dbSingleton = {
   getConnection: () => {
     if (!connection) {
       // Create a connection only once
-      connection = mysql.createConnection({
-        host: process.env.DB_HOST || "localhost",
-        user: process.env.DB_USER || "root",
-        password: process.env.DB_PASSWORD || "",
-        database: process.env.DB_NAME || "phonebook",
-        port: process.env.DB_PORT || 3306,
-      });
+      let dbConfig;
+      
+      if (process.env.MYSQL_URL) {
+        // Use Railway MySQL URL format
+        const url = new URL(process.env.MYSQL_URL);
+        dbConfig = {
+          host: url.hostname,
+          user: url.username,
+          password: url.password,
+          database: url.pathname.substring(1), // Remove leading slash
+          port: url.port || 3306,
+        };
+      } else {
+        // Fallback to individual environment variables
+        dbConfig = {
+          host: process.env.DB_HOST || "localhost",
+          user: process.env.DB_USER || "root",
+          password: process.env.DB_PASSWORD || "",
+          database: process.env.DB_NAME || "phonebook",
+          port: process.env.DB_PORT || 3306,
+        };
+      }
+      
+      connection = mysql.createConnection(dbConfig);
 
       // Connect to the database
       connection.connect((err) => {
