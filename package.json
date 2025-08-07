@@ -5,14 +5,18 @@
   "main": "BE/server.js",
   "scripts": {
     "start": "cd BE && npm start",
-    "install": "cd BE && npm install",
+    "install": "cd BE && npm install && npm install serverless-http",
     "dev": "cd BE && npm run dev",
-    "build": "cd BE && npm run build"
+    "build": "cd FE && npm install && npm run build",
+    "netlify-build": "npm install && cd FE && npm install && npm run build"
   },
   "keywords": ["phonebook", "react", "nodejs", "mysql"],
   "author": "Your Name",
   "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "serverless-http": "^3.2.0"
   }
 }

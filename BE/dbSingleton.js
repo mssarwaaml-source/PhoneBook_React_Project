@@ -1,57 +1,69 @@
 //dbSingleton.js
-const mysql = require("mysql2");
+const mysql = require('mysql2/promise');
 
-let connection; // Variable for storing a single connection
+let connection = null;
 
-const dbSingleton = {
-  getConnection: () => {
-    if (!connection) {
-      // Create a connection only once
-      let dbConfig;
-      
-      if (process.env.MYSQL_URL) {
-        // Use Railway MySQL URL format
-        const url = new URL(process.env.MYSQL_URL);
-        dbConfig = {
-          host: url.hostname,
-          user: url.username,
-          password: url.password,
-          database: url.pathname.substring(1), // Remove leading slash
-          port: url.port || 3306,
-        };
-      } else {
-        // Fallback to individual environment variables
-        dbConfig = {
-          host: process.env.DB_HOST || "localhost",
-          user: process.env.DB_USER || "root",
-          password: process.env.DB_PASSWORD || "",
-          database: process.env.DB_NAME || "phonebook",
-          port: process.env.DB_PORT || 3306,
-        };
-      }
-      
-      connection = mysql.createConnection(dbConfig);
-
-      // Connect to the database
-      connection.connect((err) => {
-        if (err) {
-          console.error("Error connecting to database:", err);
-          throw err;
-        }
-        console.log("Connected to MySQL!");
-      });
-
-      // Handle connection errors
-      connection.on("error", (err) => {
-        console.error("Database connection error:", err);
-        if (err.code === "PROTOCOL_CONNECTION_LOST") {
-          connection = null; // Update the connection state
-        }
-      });
+const createConnection = async () => {
+  try {
+    // For Netlify deployment - support multiple database types
+    let config = {};
+    
+    if (process.env.DATABASE_URL) {
+      // Parse DATABASE_URL (works for both Supabase and Railway)
+      const url = new URL(process.env.DATABASE_URL);
+      config = {
+        host: url.hostname,
+        port: url.port || 3306,
+        user: url.username,
+        password: url.password,
+        database: url.pathname.substring(1), // Remove leading slash
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      };
+    } else {
+      // Fallback to individual environment variables
+      config = {
+        host: process.env.DB_HOST || 'localhost',
+        port: process.env.DB_PORT || 3306,
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || '',
+        database: process.env.DB_NAME || 'phonebook',
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      };
     }
 
-    return connection; // Return the current connection
-  },
+    connection = await mysql.createConnection(config);
+    console.log('Connected to MySQL!');
+    return connection;
+  } catch (error) {
+    console.error('Database connection error:', error);
+    throw error;
+  }
 };
 
-module.exports = dbSingleton;
+const getConnection = async () => {
+  if (!connection) {
+    connection = await createConnection();
+  }
+  
+  // Check if connection is still alive
+  try {
+    await connection.ping();
+  } catch (error) {
+    console.log('Connection lost, reconnecting...');
+    connection = await createConnection();
+  }
+  
+  return connection;
+};
+
+const closeConnection = async () => {
+  if (connection) {
+    await connection.end();
+    connection = null;
+  }
+};
+
+module.exports = {
+  getConnection,
+  closeConnection
+};
